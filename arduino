@@ -1,0 +1,187 @@
+#include "Ultrasonic.h"
+// #include "NewPing.h"
+#include "Servo.h"
+#include <Wire.h>
+//Ultrasonic ultrasonic(7,11);
+long trig =7;
+long eco=11;
+long dest=0;
+long ul_time=0;
+Servo mservo;
+bool foundFlame = false, turnedRight = false;
+bool m = false;
+long timer = 0,timer2=0;
+long squer_destance = 4100, j = 1, ult_re= 0,n=0;
+int pos=0;
+int en1=5;
+int en2=6;
+int In1=2;
+int In2=3;
+int In3=4;
+int In4=13;
+int LFLAME=8;
+int RFLAME=10;
+int SFLAME=9;
+
+void setup()
+{
+    pinMode(In1, OUTPUT);
+    pinMode(In2, OUTPUT);
+    pinMode(In3, OUTPUT);
+    pinMode(In4, OUTPUT);
+    pinMode(en1, OUTPUT);
+    pinMode(en2, OUTPUT);
+    mservo.attach(12); 
+    mservo.write(80);
+    pinMode(LFLAME, INPUT);
+    pinMode(RFLAME, INPUT);
+    pinMode(SFLAME, INPUT);
+     pinMode(trig , OUTPUT);
+      pinMode(eco, INPUT);
+    analogWrite(en1, 110);
+    analogWrite(en2, 120);
+    stop();
+    Serial.begin(9600);
+}
+
+void loop()
+{
+   
+   if (foundFlame == false)
+        front();
+
+ timer = millis();
+    if (timer > j*squer_destance + n + (600 * (j-1)) +(ult_re*2280) && foundFlame == false&&m==false)
+    {
+       timer = millis();
+        j++;
+        if((j-1)%4==0)
+        {squer_destance-=1333;
+        j=1;
+        n=18200;
+        }
+        left();
+        delay(650);
+    } 
+    int a = ult_read();
+ Serial.println(a);
+    if (a < 40 &&m==false)
+    {
+       Serial.println(a);
+ ult_re++;
+       mservo.write(180);
+        left();
+            delay(700);
+            front();
+            delay(200);
+        m = true;
+        }
+       /* if (ultrasonic.distanceRead() > 3 && ultrasonic.distanceRead() < 30)
+        {
+          Serial.println(a);
+            mservo.write(180);
+            delay(250);
+            rite();
+            turnedRight = true;
+        }
+        else*/
+        
+           
+    
+    
+    if ( a > 50 && m == true)
+    {
+       Serial.println(a);
+       mservo.write(90);
+            rite();
+             delay(600);
+            front();
+            delay(1550);
+            rite();
+             delay(600);
+            // stop();
+            left();
+            delay(700);
+            m = false;
+    }
+
+    /*if (digitalRead(LFLAME) == LOW)
+    {
+        left();
+        stop();
+        delay(500);
+        foundFlame = true;
+    }
+
+    if (digitalRead(RFLAME) == LOW)
+    {
+        rite();
+        stop();
+        delay(500);
+       foundFlame  = true;
+    }
+
+    if (digitalRead(SFLAME) == LOW)
+    {
+        front();
+        delay(250);
+        stop();
+        delay(500);
+        Serial.println(SFLAME); 
+        foundFlame = true;
+    }*/
+  
+}
+int ult_read()
+{
+  dest=0;
+  digitalWrite(trig, LOW);
+delayMicroseconds(2);
+// Sets the trigPin on HIGH state for 10 micro seconds
+digitalWrite(trig, HIGH);
+delayMicroseconds(10);
+digitalWrite(trig, LOW);
+    ul_time=pulseIn(eco,HIGH);
+    dest=ul_time*0.034/2;
+    return dest;
+}
+void left()
+{
+    digitalWrite(In1, 1);
+    digitalWrite(In2, 0);
+    digitalWrite(In3, 0);
+    digitalWrite(In4, 1);
+    
+}
+void rite()
+{
+    digitalWrite(In1, 0);
+    digitalWrite(In2, 1);
+    digitalWrite(In3, 1);
+    digitalWrite(In4, 0);
+   // Serial.println(RFLAME);
+}
+   
+void front()
+{
+    digitalWrite(In1, 0);
+    digitalWrite(In2, 1);
+    digitalWrite(In3, 0);
+    digitalWrite(In4, 1);
+
+}
+void back()
+{
+    digitalWrite(In1, 1);
+    digitalWrite(In2, 0);
+    digitalWrite(In3, 1);
+    digitalWrite(In4, 0);
+}
+void stop()
+{
+    digitalWrite(In1, 0);
+    digitalWrite(In2, 0);
+    digitalWrite(In3, 0);
+    digitalWrite(In4, 0);
+
+}
